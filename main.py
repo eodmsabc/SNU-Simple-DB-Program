@@ -109,11 +109,28 @@ def create_book():
         cursor.execute(sql)
     connection.commit()
 
+def print_line(data, lengthList):
+    length = len(data)
+    formatStr = ""
+    for i in range(0, length):
+        formatStr = formatStr + "{" + "{num}:<{len}s".format(num=i, len=lengthList[i]) + "}"
+        if i != length-1:
+            formatStr = formatStr + "\t"
+    
 def print_align(titleList, records):
-    # TODO
-    print("-----------------------------------")
+    colNum = len(titleList)
+    maxLen = [0] * colNum
+    
+    for i in range(0, colNum):
+        maxLen[i] = len(titleList[i])
+
+    for rec in records:
+        for i in range(0, colNum):
+            maxLen[i] = max(maxLen[i], len(str(rec[i])))
+    
+    print("-----------------------------------------------------------------------------------------")
     print(titleList)
-    print("-----------------------------------")
+    print("-----------------------------------------------------------------------------------------")
     for i in records:
         print(i)
 
@@ -197,7 +214,6 @@ def print_buildings():
         result = cursor.fetchall()
     titleList = ('id', 'name', 'location', 'capacity', 'assigned')
     print_align(titleList, result)
-
 # 2
 def print_performances():
     with connection.cursor() as cursor:
@@ -211,7 +227,6 @@ def print_performances():
         result = cursor.fetchall()
     titleList = ('id', 'name', 'type', 'price', 'booked')
     print_align(titleList, result)
-
 # 3
 def print_audiences():
     with connection.cursor() as cursor:
@@ -224,7 +239,6 @@ def print_audiences():
         result = cursor.fetchall()
     titleList = ('id', 'name', 'gender', 'age')
     print_align(titleList, result)
-
 # 4
 def insert_building():
     with connection.cursor() as cursor:
@@ -244,7 +258,6 @@ def insert_building():
         cursor.execute(sql, (bldg_n, bldg_l, bldg_c))
         print("A building is successfully inserted")
     connection.commit()
-
 # 5
 def remove_building():
     with connection.cursor() as cursor:
@@ -260,7 +273,6 @@ def remove_building():
         cursor.execute(sql, bldg_id)
         print("The building " + bldg_id + " is successfully deleted")
     connection.commit()
-
 # 6
 def insert_performance():
     with connection.cursor() as cursor:
@@ -280,7 +292,6 @@ def insert_performance():
         cursor.execute(sql, (pf_n, pf_t, pf_p))
         print("A performance is successfully inserted")
     connection.commit()
-
 # 7
 def remove_performance():
     with connection.cursor() as cursor:
@@ -296,7 +307,6 @@ def remove_performance():
         cursor.execute(sql, pf_id)
         print("The performance " + pf_id + " is successfully deleted")
     connection.commit()
-
 # 8
 def insert_audience():
     with connection.cursor() as cursor:
@@ -320,7 +330,6 @@ def insert_audience():
         cursor.execute(sql, (aud_n, aud_g, aud_a))
         print("An audience is successfully inserted")
     connection.commit()
-
 # 9
 def remove_audience():
     with connection.cursor() as cursor:
@@ -336,7 +345,6 @@ def remove_audience():
         cursor.execute(sql, aud_id)
         print("The audience " + aud_id + " is successfully deleted")
     connection.commit()
-
 # 10
 def assign_performance():
     with connection.cursor() as cursor:
@@ -369,7 +377,6 @@ def assign_performance():
         cursor.execute(sql, (bldg_id, pf_id))
         print("Successfully assign a performance")
     connection.commit()
-
 # 11
 def book_performance():
     with connection.cursor() as cursor:
@@ -423,7 +430,6 @@ def book_performance():
         total = price_calculator(age, price, len(seat_list))
         print("Total ticket price is {:,}".format(total))
     connection.commit()
-
 # 12
 def print_assigned_performances():
     with connection.cursor() as cursor:
@@ -444,7 +450,6 @@ def print_assigned_performances():
         result = cursor.fetchall()
     titleList = ('id', 'name', 'type', 'price', 'booked')
     print_align(titleList, result)
-
 # 13
 def print_booked_audiences():
     with connection.cursor() as cursor:
@@ -463,7 +468,6 @@ def print_booked_audiences():
         result = cursor.fetchall()
     titleList = ('id', 'name', 'gender', 'age')
     print_align(titleList, result)
-
 # 14
 def print_booking_status():
     with connection.cursor() as cursor:
@@ -496,7 +500,6 @@ def print_booking_status():
     result = zip(range(1, capacity+1), result)
     titleList = ('seat_number', 'audience_id')
     print_align(titleList, result)
-
 # 16
 def reset_database():
     while True:
