@@ -98,14 +98,14 @@ def create_book():
                 PRIMARY KEY (`p_id`, `seat`),
                 CONSTRAINT `book_performance`
                     FOREIGN KEY (`p_id`)
-                    REFERENCES {performances} (`ID`)
+                    REFERENCES {assign} (`p_id`)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE,
                 CONSTRAINT `book_audience`
                     FOREIGN KEY (`a_id`)
                     REFERENCES {audiences} (`ID`)
                     ON DELETE CASCADE
-                    ON UPDATE CASCADE)""".format(book=T_Book, performances=T_Performances, audiences=T_Audiences)
+                    ON UPDATE CASCADE)""".format(book=T_Book, assign=T_Assign, audiences=T_Audiences)
         cursor.execute(sql)
     connection.commit()
 
@@ -377,14 +377,14 @@ def assign_performance():
             return
 
         # Check if the performance is already assigned to other building
-        sql= """SELECT p_id
+        sql= """SELECT p_id, b_id
                 FROM {assign}
                 WHERE p_id=%s
                 """.format(assign=T_Assign)
         cursor.execute(sql, pf_id)
         check = cursor.fetchone()
         if check is not None:
-            print("Performance " + pf_id + " is already assigned to Building " + bldg_id)
+            print("Error: Performance " + pf_id + " is already assigned to Building " + str(check[1]))
             return
 
         sql= """INSERT INTO {assign}
@@ -392,7 +392,7 @@ def assign_performance():
                 VALUES (%s, %s)
                 """.format(assign=T_Assign)
 
-        cursor.execute(sql, (bldg_id, pf_id))
+        cursor.execute(sql, (pf_id, bldg_id))
         print("Successfully assign a performance")
     connection.commit()
 # 11
