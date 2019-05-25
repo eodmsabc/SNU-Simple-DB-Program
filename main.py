@@ -109,13 +109,21 @@ def create_book():
         cursor.execute(sql)
     connection.commit()
 
+def data_to_str(data):
+    if data is None:
+        return ""
+    else:
+        return str(data)
+
 def print_line(data, lengthList):
+    data = list(map(data_to_str, data))
     length = len(data)
     formatStr = ""
     for i in range(0, length):
         formatStr = formatStr + "{" + "{num}:<{len}s".format(num=i, len=lengthList[i]) + "}"
         if i != length-1:
-            formatStr = formatStr + "\t"
+            formatStr = formatStr + "    "
+    print(formatStr.format(*data))
     
 def print_align(titleList, records):
     colNum = len(titleList)
@@ -129,10 +137,11 @@ def print_align(titleList, records):
             maxLen[i] = max(maxLen[i], len(str(rec[i])))
     
     print("-----------------------------------------------------------------------------------------")
-    print(titleList)
+    print_line(titleList, maxLen)
     print("-----------------------------------------------------------------------------------------")
+    
     for i in records:
-        print(i)
+        print_line(i, maxLen)
 
 def id_exists(tableName, id):
     with connection.cursor() as cursor:
@@ -205,7 +214,7 @@ def price_calculator(age, price, number):
 def print_buildings():
     with connection.cursor() as cursor:
 
-        sql= """SELECT id, name, location, capacity, count(p_id)
+        sql= """SELECT id, name, location, capacity, COUNT(p_id)
                 FROM {buildings} LEFT OUTER JOIN {assign} ON id=b_id
                 GROUP BY id
                 """.format(buildings=T_Buildings, assign=T_Assign)
@@ -218,7 +227,7 @@ def print_buildings():
 def print_performances():
     with connection.cursor() as cursor:
 
-        sql= """SELECT id, name, type, price, count(seat)
+        sql= """SELECT id, name, type, price, COUNT(DISTINCT a_id)
                 FROM {performances} LEFT OUTER JOIN {book} ON id=p_id
                 GROUP BY id
                 """.format(performances=T_Performances, book=T_Book)
@@ -249,6 +258,9 @@ def insert_building():
         if int(bldg_c) <= 0:
             print("Capacity should be positive integer")
             return
+
+        bldg_n = bldg_n[:200]
+        bldg_l = bldg_l[:200]
 
         sql= """INSERT INTO {buildings}
                 (`name`, `location`, `capacity`)
@@ -283,6 +295,9 @@ def insert_performance():
         if int(pf_p) < 0:
             print("Price should be non-negative integer")
             return
+        
+        pf_n = pf_n[:200]
+        pf_t = pf_t[:200]
 
         sql= """INSERT INTO {performances}
                 (`name`, `type`, `price`)
@@ -312,6 +327,9 @@ def insert_audience():
     with connection.cursor() as cursor:
 
         aud_n = input("Audience name: ")
+
+        aud_n = aud_n[:200]
+
         aud_g = input("Audience gender: ")
         if (aud_g != 'M' and aud_g != 'F'):
             print("Gender should be 'M' or 'F'")
@@ -440,7 +458,7 @@ def print_assigned_performances():
             return
 
 
-        sql= """SELECT id, name, type, price, count(seat)
+        sql= """SELECT id, name, type, price, COUNT(seat)
                 FROM ({performances} as P LEFT OUTER JOIN {book} ON id=p_id) JOIN {assign} as A ON P.id=A.p_id
                 WHERE b_id=%s
                 GROUP BY id
@@ -471,7 +489,7 @@ def print_booked_audiences():
 # 14
 def print_booking_status():
     with connection.cursor() as cursor:
-
+        
         pf_id = input("Performance ID: ")
         if not id_exists(T_Performances, pf_id):
             print("There is no performance with id " + pf_id)
@@ -490,14 +508,14 @@ def print_booking_status():
 
         cursor.execute(sql, pf_id)
         status = cursor.fetchall()
-        print(capacity)
         result = [None] * (capacity + 1)
+
         for bk in status:
             result[bk[0]] = bk[1]
 
         del result[0]
 
-    result = zip(range(1, capacity+1), result)
+    result = list(zip(range(1, capacity+1), result))
     titleList = ('seat_number', 'audience_id')
     print_align(titleList, result)
 # 16
