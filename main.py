@@ -1,8 +1,8 @@
 import pymysql.cursors
-import warnings
+#import warnings
 import ast
 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 db_student_id = 'DB2014_15395'
 def connect_server():
@@ -79,12 +79,12 @@ def create_assign():
                 PRIMARY KEY (`p_id`),
                 CONSTRAINT `assign_performance`
                     FOREIGN KEY (`p_id`)
-                    REFERENCES {performances} (`ID`)
+                    REFERENCES {performances} (`id`)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE,
                 CONSTRAINT `assign_building`
                     FOREIGN KEY (`b_id`)
-                    REFERENCES {buildings} (`ID`)
+                    REFERENCES {buildings} (`id`)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE)""".format(assign=T_Assign, performances=T_Performances, buildings=T_Buildings)
         cursor.execute(sql)
@@ -103,7 +103,7 @@ def create_book():
                     ON UPDATE CASCADE,
                 CONSTRAINT `book_audience`
                     FOREIGN KEY (`a_id`)
-                    REFERENCES {audiences} (`ID`)
+                    REFERENCES {audiences} (`id`)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE)""".format(book=T_Book, assign=T_Assign, audiences=T_Audiences)
         cursor.execute(sql)
