@@ -1,8 +1,4 @@
 import pymysql.cursors
-#import warnings
-import ast
-
-#warnings.filterwarnings("ignore")
 
 db_student_id = 'DB2014_15395'
 def connect_server():
@@ -256,7 +252,7 @@ def insert_building():
         bldg_l = input("Building location: ")
         bldg_c = input("Building capacity: ")
         if int(bldg_c) <= 0:
-            print("Capacity should be positive integer")
+            print("Capacity should be larger than 0")
             return
 
         bldg_n = bldg_n[:200]
@@ -276,14 +272,14 @@ def remove_building():
 
         bldg_id = input("Enter building id to remove: ")
         if not id_exists(T_Buildings, bldg_id):
-            print("There is no building with id " + bldg_id)
+            print("Building " + bldg_id + " doesn't exist")
             return
 
         sql= """DELETE FROM {buildings}
                 WHERE id=%s""".format(buildings=T_Buildings)
 
         cursor.execute(sql, bldg_id)
-        print("The building " + bldg_id + " is successfully deleted")
+        print("A building is successfully removed")
     connection.commit()
 # 6
 def insert_performance():
@@ -293,7 +289,7 @@ def insert_performance():
         pf_t = input("Performance type: ")
         pf_p = input("Performance price: ")
         if int(pf_p) < 0:
-            print("Price should be non-negative integer")
+            print("Price should be 0 or more")
             return
         
         pf_n = pf_n[:200]
@@ -313,14 +309,14 @@ def remove_performance():
 
         pf_id = input("Enter performance id to remove: ")
         if not id_exists(T_Performances, pf_id):
-            print("There is no performance with id " + pf_id)
+            print("Performance " + pf_id + " doesn't exist")
             return
 
         sql= """DELETE FROM {performances}
                 WHERE id=%s""".format(performances=T_Performances)
 
         cursor.execute(sql, pf_id)
-        print("The performance " + pf_id + " is successfully deleted")
+        print("A performance is successfully removed")
     connection.commit()
 # 8
 def insert_audience():
@@ -337,7 +333,7 @@ def insert_audience():
 
         aud_a = input("Audience age: ")
         if int(aud_a) <= 0:
-            print("Price should be positive integer")
+            print("Age should be more than 0")
             return
 
         sql= """INSERT INTO {audiences}
@@ -354,26 +350,26 @@ def remove_audience():
 
         aud_id = input("Enter audience id to remove: ")
         if not id_exists(T_Audiences, aud_id):
-            print("There is no audience with id " + aud_id)
+            print("Audience " + aud_id + " doesn't exist")
             return
 
         sql= """DELETE FROM {audiences}
                 WHERE id=%s""".format(audiences=T_Audiences)
 
         cursor.execute(sql, aud_id)
-        print("The audience " + aud_id + " is successfully deleted")
+        print("An audience is successfully removed")
     connection.commit()
 # 10
 def assign_performance():
     with connection.cursor() as cursor:
         bldg_id = input("Building ID: ")
         if not id_exists(T_Buildings, bldg_id):
-            print("There is no building with id " + bldg_id)
+            print("Building " + bldg_id + " doesn't exist")
             return
 
         pf_id = input("Performance ID: ")
         if not id_exists(T_Performances, pf_id):
-            print("There is no performance with id " + pf_id)
+            print("Performance " + pf_id + " doesn't exist")
             return
 
         # Check if the performance is already assigned to other building
@@ -384,7 +380,7 @@ def assign_performance():
         cursor.execute(sql, pf_id)
         check = cursor.fetchone()
         if check is not None:
-            print("Error: Performance " + pf_id + " is already assigned to Building " + str(check[1]))
+            print("Performance " + pf_id + " is already assigned")
             return
 
         sql= """INSERT INTO {assign}
@@ -400,36 +396,31 @@ def book_performance():
     with connection.cursor() as cursor:
         pf_id = input("Performance ID: ")
         if not id_exists(T_Performances, pf_id):
-            print("There is no performance with id " + pf_id)
+            print("Performance " + pf_id + " doesn't exist")
             return
 
         pf_info = get_performance_info(pf_id)
         capacity = pf_info[0]
         price = pf_info[1]
         if capacity == 0:
-            print("Performance " + pf_id + " is not assigned to building now")
+            print("Performance " + pf_id + " isn't assigned")
             return
 
         aud_id = input("Audience ID: ")
         if not id_exists(T_Audiences, aud_id):
-            print("There is no audience with id " + aud_id)
+            print("Audience " + aud_id + " doesn't exist")
             return
 
         seat_raw = input("Seat number: ")
 
-        seat_list = ast.literal_eval(seat_raw)
-
-        if isinstance(seat_list, int):
-            seat_list = [seat_list]
+        seat_list = list(map(int, seat_raw.split(',')))
 
         # Check seats
         for seat in seat_list:
-            if seat <= 0:
-                print("Invalid seat(" + seat + "): Seat number should be positive integer")
+            if seat <= 0 or capacity < seat:
+                print("Seat number out of range")
                 return
-            if capacity < seat:
-                print("Invalid seat(" + seat + "): Assigned building has only " + capacity + " seats")
-                return
+
             if already_booked(pf_id, seat):
                 print("The seat is already taken")
                 return
@@ -446,7 +437,8 @@ def book_performance():
 
         age = get_audience_age(aud_id)
         total = price_calculator(age, price, len(seat_list))
-        print("Total ticket price is {:,}".format(total))
+        #print("Total ticket price is {:,}".format(total))
+        print("Total ticket price is {price}".format(price=total))
     connection.commit()
 # 12
 def print_assigned_performances():
@@ -454,7 +446,7 @@ def print_assigned_performances():
 
         bldg_id = input("Building ID: ")
         if not id_exists(T_Buildings, bldg_id):
-            print("There is no building with id " + bldg_id)
+            print("Building " + bldg_id + " doesn't exist")
             return
 
 
@@ -474,7 +466,7 @@ def print_booked_audiences():
 
         pf_id = input("Performance ID: ")
         if not id_exists(T_Performances, pf_id):
-            print("There is no performance with id " + pf_id)
+            print("Performance " + pf_id + " doesn't exist")
             return
 
         sql= """SELECT DISTINCT id, name, gender, age
@@ -492,13 +484,13 @@ def print_booking_status():
         
         pf_id = input("Performance ID: ")
         if not id_exists(T_Performances, pf_id):
-            print("There is no performance with id " + pf_id)
+            print("Performance " + pf_id + " doesn't exist")
             return
 
         pf_info = get_performance_info(pf_id)
         capacity = pf_info[0]
         if capacity == 0:
-            print("Performance " + pf_id + " is not assigned to building now")
+            print("Performance " + pf_id + " isn't assigned")
             return
 
         sql= """SELECT seat, a_id
@@ -572,10 +564,11 @@ while True:
         option = int(raw)
 
         if option == 15:
+            print("Bye!")
             break
 
         elif option < 1 or 16 < option:
-            print("Invalid Operation")
+            print("Invalid action")
             print()
             continue
 
