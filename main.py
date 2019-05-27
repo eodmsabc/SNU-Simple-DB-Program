@@ -105,14 +105,8 @@ def create_book():
         cursor.execute(sql)
     connection.commit()
 
-def data_to_str(data):
-    if data is None:
-        return ""
-    else:
-        return str(data)
-
 def print_line(data, lengthList):
-    data = list(map(data_to_str, data))
+    data = list(map(str, data))
     length = len(data)
     formatStr = ""
     for i in range(0, length):
@@ -500,7 +494,7 @@ def print_booking_status():
 
         cursor.execute(sql, pf_id)
         status = cursor.fetchall()
-        result = [None] * (capacity + 1)
+        result = [""] * (capacity + 1)
 
         for bk in status:
             result[bk[0]] = bk[1]
