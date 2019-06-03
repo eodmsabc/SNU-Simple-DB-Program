@@ -198,7 +198,13 @@ def price_calculator(age, price, number):
         multiply = 0.8
     else:
         multiply = 1
-    return int(price * number * multiply)
+    rawp = price * number * multiply
+    intp = int(rawp)
+    if rawp - intp >= 0.5:
+        result = intp + 1
+    else:
+        result = intp
+    return result
 
 # 1
 def print_buildings():
