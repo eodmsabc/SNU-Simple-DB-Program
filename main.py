@@ -199,11 +199,7 @@ def price_calculator(age, price, number):
     else:
         multiply = 1
     rawp = price * number * multiply
-    intp = int(rawp)
-    if rawp - intp >= 0.5:
-        result = intp + 1
-    else:
-        result = intp
+    result = int(rawp + 0.5)
     return result
 
 # 1
